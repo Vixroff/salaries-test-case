@@ -8,8 +8,7 @@ from alembic import context
 
 sys.path = ['', '..'] + sys.path[1:]
 
-from database import Base
-
+from database import Base, get_database_url
 from app.models import Salary, Employee
 
 # this is the Alembic Config object, which provides
@@ -33,15 +32,6 @@ target_metadata = Base.metadata
 # ... etc.
 
 
-def get_url():
-    user = os.getenv("POSTGRES_USER", "postgres")
-    password = os.getenv("POSTGRES_PASSWORD", "password")
-    host = os.getenv("POSTGRES_HOST", "0.0.0.0")
-    port = os.getenv("POSTGRES_PORT", 5432)
-    db = os.getenv("POSTGRES_DB", "database")
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
-
-
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -54,7 +44,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = get_url()
+    url = get_database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -74,7 +64,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_url()
+    configuration["sqlalchemy.url"] = get_database_url()
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
