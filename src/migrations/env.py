@@ -8,8 +8,9 @@ from alembic import context
 
 sys.path = ['', '..'] + sys.path[1:]
 
-from database import Base, get_database_url
-from app.models import Salary, Employee
+from database import Base
+from app.models import Salary
+from auth.models import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -30,6 +31,14 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+def get_database_url():
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "password")
+    host = os.getenv("POSTGRES_HOST", "0.0.0.0")
+    port = os.getenv("POSTGRES_PORT", 5432)
+    db = os.getenv("POSTGRES_DB", "database")
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
 def run_migrations_offline() -> None:

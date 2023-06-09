@@ -1,7 +1,7 @@
 import os
+from typing import AsyncGenerator
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -11,10 +11,14 @@ def get_database_url():
     host = os.getenv("POSTGRES_HOST", "0.0.0.0")
     port = os.getenv("POSTGRES_PORT", 5432)
     db = os.getenv("POSTGRES_DB", "database")
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+    return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
 
-engine = create_engine(get_database_url(), echo=True)
+engine = create_async_engine(get_database_url())
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 Base = declarative_base()
 
-db_session = scoped_session(sessionmaker(bind=engine))
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_maker() as session:
+        yield session
+
