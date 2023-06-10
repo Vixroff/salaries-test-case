@@ -1,0 +1,6 @@
+fastapi[all]==0.96.0
+SQLAlchemy==2.0.15
+alembic==1.11.1
+asyncpg==0.27.0
+psycopg2-binary==2.9.6
+fastapi-users[sqlalchemy]==11.0.0

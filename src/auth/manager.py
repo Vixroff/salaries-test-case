@@ -1,10 +1,11 @@
 import uuid
-from typing import Optional
+from typing import Annotated, Optional
 
-from fastapi import Request
+from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin
+from fastapi_users.db import SQLAlchemyUserDatabase
 
-from .models import User
+from .models import User, get_user_db
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
@@ -13,4 +14,5 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         print(f"User {user.id} has registered.")
 
 
-
+async def get_user_manager(user_db: Annotated[SQLAlchemyUserDatabase, Depends(get_user_db) ]):
+    yield UserManager(user_db)
