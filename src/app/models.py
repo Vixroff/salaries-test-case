@@ -7,16 +7,16 @@ from database import Base
 
 
 class Salary(Base):
-    __tablename__ = 'salary'
+    __tablename__ = 'salaries'
 
     id = Column(UUID, primary_key=True, index=True, default=uuid.uuid4)
     salary = Column(Numeric(precision=10, scale=2))
     increase_date = Column(Date)
 
-    user_id = Column(UUID, ForeignKey('user.id', ondelete='CASCADE'), index=True)
-    user = relationship('User', back_populates='salary')
+    employee_id = Column(UUID, ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    employee = relationship('Employee', back_populates='salary')
 
 
-from auth.models import User
+from users.models import Employee
 
-User.salary = relationship('Salary', uselist=False, back_populates='user')
+Employee.salary = relationship('Salary', uselist=False, back_populates='employee')

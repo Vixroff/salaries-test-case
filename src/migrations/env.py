@@ -8,7 +8,7 @@ from sqlalchemy import engine_from_config, pool
 sys.path = ['', '..'] + sys.path[1:]
 
 from app.models import Salary
-from auth.models import User
+from users.models import Employee
 from database import Base
 
 # this is the Alembic Config object, which provides
@@ -40,6 +40,15 @@ def get_database_url():
     return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
+def get_url():
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "password")
+    host = os.getenv("POSTGRES_HOST", "0.0.0.0")
+    port = os.getenv("POSTGRES_PORT", 5432)
+    db = os.getenv("POSTGRES_DB", "database")
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -52,7 +61,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = get_database_url()
+    url = get_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -72,7 +81,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_database_url()
+    configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
