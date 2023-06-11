@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, UUID4
+from pydantic import UUID4, BaseModel, Field
 
 
 class UserIn(BaseModel):
@@ -14,3 +14,6 @@ class UserIn(BaseModel):
 class UserOut(BaseModel):
     id: UUID4
     username: str
+
+    class Config:
+        orm_mode = True

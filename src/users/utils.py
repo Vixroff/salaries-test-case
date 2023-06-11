@@ -1,9 +1,9 @@
 import os
 from datetime import datetime, timedelta
-from typing import Union, Any
+from typing import Any, Union
 
-from passlib.context import CryptContext
 from jose import jwt
+from passlib.context import CryptContext
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('JWT_SECRET_KEY')

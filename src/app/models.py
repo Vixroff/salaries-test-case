@@ -4,6 +4,7 @@ from sqlalchemy import UUID, Column, Date, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 
 from database import Base
+from users.models import User
 
 
 class Salary(Base):
@@ -13,10 +14,10 @@ class Salary(Base):
     salary = Column(Numeric(precision=10, scale=2))
     increase_date = Column(Date)
 
-    employee_id = Column(UUID, ForeignKey('users.id', ondelete='CASCADE'), index=True)
-    employee = relationship('Employee', back_populates='salary')
+    user_id = Column(UUID, ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    user = relationship('Employee', back_populates='salary')
 
 
-from users.models import Employee
+from users.models import User
 
-Employee.salary = relationship('Salary', uselist=False, back_populates='employee')
+User.salary = relationship('Salary', uselist=False, back_populates='user')
