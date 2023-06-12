@@ -16,7 +16,7 @@ def get_database_url():
 
 engine = create_async_engine(get_database_url())
 
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False, autoflush=False, )
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
