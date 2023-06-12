@@ -5,6 +5,8 @@ from typing import Any, Union
 from jose import jwt
 from passlib.context import CryptContext
 
+from .models import User
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 JWT_SECRET_KEY = str(os.getenv('JWT_SECRET_KEY'))
