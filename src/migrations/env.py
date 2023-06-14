@@ -7,9 +7,8 @@ from sqlalchemy import engine_from_config, pool
 
 sys.path = ['', '..'] + sys.path[1:]
 
-from app.models import Salary
+from app.models import Salary, User
 from database import Base
-from users.models import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

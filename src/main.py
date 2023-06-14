@@ -9,4 +9,4 @@ sys.path.append(BASE_DIR)
 
 app = FastAPI()
 
-from users import routers
+from app import routers

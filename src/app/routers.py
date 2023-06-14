@@ -9,10 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_async_session
 from main import app
 
+from .dependencies import get_current_owner_user
 from .models import User
-from .dependencies import authenticate_user
-from .schemes import UserIn, UserOut, Token
-from .utils import get_hashed_password, create_access_token
+from .schemes import Token, UserIn, UserOut
+from .utils import authenticate_user, create_access_token, get_hashed_password
 
 
 @app.post('/users', status_code=HTTPStatus.CREATED, response_model=UserOut)
@@ -54,3 +54,10 @@ async def login_user(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+
+@app.get("/users/{username}/salary")
+async def get_salary(
+    user: Annotated[User, Depends(get_current_owner_user)],
+):
+    return await user.awaitable_attrs.salary

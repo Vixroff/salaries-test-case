@@ -1,34 +1,20 @@
-from typing import Annotated
-from http import HTTPStatus
 import os
+from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Path
 from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import jwt, JWTError
 
 from database import get_async_session
 
 from .models import User
-from .utils import verify_password
 
-ALGORITHM = "HS256"
+ALGORITHM = os.getenv('JWT_ALGORITHM')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-async def authenticate_user(
-    session: AsyncSession,
-    username: str,
-    password: str
-):
-    result = await session.scalars(
-        select(User).where(User.username==username)
-    )
-    user = result.first()
-    if user and verify_password(password, user.hashed_password):
-        return user
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/jwt")
 
 
 async def get_current_user(
@@ -58,3 +44,16 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_owner_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+    username: Annotated[str, Path()]
+):
+    if current_user.username == username:
+        return current_user
+    else:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail=f"You don't have permission"
+        )
