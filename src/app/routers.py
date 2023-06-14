@@ -6,13 +6,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.users import get_user
 from database import get_async_session
 from main import app
 
 from .dependencies import get_current_owner_user
 from .models import User
-from .schemes import Token, UserIn, UserOut
-from .utils import authenticate_user, create_access_token, get_hashed_password
+from .schemes import Salary, Token, UserIn, UserOut
+from .utils import create_access_token, get_hashed_password, verify_password
 
 
 @app.post('/users', status_code=HTTPStatus.CREATED, response_model=UserOut)
@@ -42,8 +43,8 @@ async def login_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ):
-    user = await authenticate_user(session, form_data.username, form_data.password)
-    if user:
+    user = await get_user(session, form_data.username)
+    if user and verify_password(form_data.password, user.hashed_password):
         return {
             "access_token": create_access_token(user.username),
             "token_type": "bearer"
@@ -56,8 +57,15 @@ async def login_user(
         )
 
 
-@app.get("/users/{username}/salary")
+@app.get("/users/{username}/salary", status_code=HTTPStatus.OK, response_model=Salary)
 async def get_salary(
     user: Annotated[User, Depends(get_current_owner_user)],
 ):
-    return await user.awaitable_attrs.salary
+    salary = await user.awaitable_attrs.salary
+    if salary:
+        return salary
+    else:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Salary not found"
+        )

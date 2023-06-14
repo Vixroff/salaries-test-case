@@ -5,21 +5,19 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.users import get_user
 from database import get_async_session
 
 from .models import User
-
-ALGORITHM = os.getenv('JWT_ALGORITHM')
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/jwt")
 
 
 async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    token: Annotated[str, Depends(oauth2_scheme)]
 ):
     credentials_exception = HTTPException(
         status_code=HTTPStatus.UNAUTHORIZED,
@@ -30,29 +28,34 @@ async def get_current_user(
         payload = jwt.decode(
             token,
             str(os.getenv('JWT_SECRET_KEY')),
-            algorithms=[ALGORITHM]
+            algorithms=[os.getenv('JWT_ALGORITHM')]
         )
-        username = payload.get("sub")
-        if username is None:
-            raise credentials_exception
     except JWTError:
         raise credentials_exception
-    result = await session.scalars(
-        select(User).where(User.username==username)
-    )
-    user = result.first()
-    if user is None:
-        raise credentials_exception
-    return user
+    else:
+        username = payload.get("sub")
+        user = await get_user(session, username)
+        if user:
+            return user
+        else:
+            raise credentials_exception
 
 
 async def get_current_owner_user(
     current_user: Annotated[User, Depends(get_current_user)],
-    username: Annotated[str, Path()]
+    username: Annotated[str, Path()],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    if current_user.username == username:
+    user = await get_user(session, username)
+    if user and current_user.username == user.username:
         return current_user
-    else:
+
+    elif user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"User '{username}' doesnt't exist"
+        )
+    elif current_user.username != user.username:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
             detail=f"You don't have permission"
