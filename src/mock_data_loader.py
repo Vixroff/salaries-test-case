@@ -1,6 +1,7 @@
-
 import asyncio
 from datetime import date, timedelta
+
+from sqlalchemy.exc import IntegrityError
 
 from app.models import Salary, User
 from app.utils import get_hashed_password
@@ -24,7 +25,10 @@ async def load_fake_data(count):
             user.salary = salary
             content.append(user)
         async_session.add_all(content)
-        await async_session.commit()
+        try:
+            await async_session.commit()
+        except IntegrityError:
+            await async_session.rollback()
 
 
 if __name__ == "__main__":

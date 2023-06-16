@@ -30,21 +30,13 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-def get_database_url():
-    user = os.getenv("POSTGRES_USER", "postgres")
-    password = os.getenv("POSTGRES_PASSWORD", "password")
-    host = os.getenv("POSTGRES_HOST", "db")
-    port = os.getenv("POSTGRES_PORT", 5432)
-    db = os.getenv("POSTGRES_DB", "database")
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
-
 
 def get_url():
-    user = os.getenv("POSTGRES_USER", "postgres")
-    password = os.getenv("POSTGRES_PASSWORD", "password")
-    host = os.getenv("POSTGRES_HOST", "0.0.0.0")
-    port = os.getenv("POSTGRES_PORT", 5432)
-    db = os.getenv("POSTGRES_DB", "database")
+    user = os.getenv("DB_USER", "postgres")
+    password = os.getenv("DB_PASSWORD", "password")
+    host = os.getenv("DB_HOST", "db")
+    port = os.getenv("DB_PORT", 5432)
+    db = os.getenv("DB_NAME", "database")
     return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
